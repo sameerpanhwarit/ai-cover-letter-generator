@@ -256,6 +256,7 @@ async def generate_cover_letter(data: dict) -> str:
                     final_letter = f"{salutation}\n\n{final_letter}"
 
                 return final_letter
+                print(f"final letter: {final_letter}")
 
         except Exception as e:
             if attempt < MAX_RETRIES - 1:
