@@ -6,18 +6,21 @@ A FastAPI-based backend service that generates professional cover letters using 
 - Upload a resume (PDF or DOCX) and a job description to generate a cover letter.
 - Customizable tone and word limit for the generated letter.
 - Clean, plain-text output suitable for direct use.
+- Check your resume's ATS (Applicant Tracking System) compatibility score.
 
 ## Directory Structure
 ```
 app/
   ├── api/           # API route definitions
   │    └── routes.py
-  ├── services/      # Business logic (cover letter generation)
-  │    └── generator.py
+  ├── services/      # Business logic (cover letter generation)     
+  |    ├──   generator.py
+  │    └── ats.py         # Business logic for ATS score checking
   ├── utils/         # Utility functions (resume parsing)
   │    └── resume_parser.py
   ├── schemas/       # Pydantic models for request/response
-  │    └── coverletter.py
+  │    ├── coverletter.py
+  │    └── ats.py         # Pydantic model for ATS score response
   ├── config.py      # Configuration (env variables)
   └── main.py        # FastAPI app entry point
 Dockerfile           # Containerization setup
@@ -84,11 +87,26 @@ curl -X POST "http://localhost:8000/api/v1/generate" \
   -F "word_limit=250"
 ```
 
+### `POST /api/v1/ats-score`
+- **Description:** Get an ATS (Applicant Tracking System) compatibility score for a resume. The score (0-100) estimates how well the resume would perform in automated resume screening systems.
+- **Request:**
+  - `resume`: File upload (PDF or DOCX)
+- **Response:**
+  - `score`: Float (the ATS compatibility score, 0-100)
+
+#### Example (using `curl`):
+```bash
+curl -X POST "http://localhost:8000/api/v1/ats-score" \
+  -F "resume=@/path/to/resume.pdf"
+```
+
 ## Core Components
-- **app/api/routes.py**: Defines the `/generate` endpoint, handles file upload, and orchestrates the cover letter generation.
-- **app/services/generator.py**: Contains logic to build prompts and interact with the LLM API, and post-processes the generated text.
-- **app/utils/resume_parser.py**: Extracts text from PDF and DOCX resumes.
-- **app/schemas/coverletter.py**: Pydantic model for the API response.
+- **app/api/routes.py**: Defines the `/generate` and `/ats-score` endpoints, handles file upload, and orchestrates cover letter generation and ATS scoring.
+- **app/services/generator.py**: Contains logic to build prompts and interact with the LLM API for cover letter generation, and post-processes the generated text.
+- **app/services/ats.py**: Contains logic to build prompts and interact with the LLM API for ATS score calculation.
+- **app/utils/resume_parser.py**: Extracts text from PDF and DOCX resumes (used by both endpoints).
+- **app/schemas/coverletter.py**: Pydantic model for the cover letter API response.
+- **app/schemas/ats.py**: Pydantic model for the ATS score API response.
 - **app/config.py**: Loads environment variables for configuration.
 
 ## Dependencies
